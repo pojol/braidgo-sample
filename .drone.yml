@@ -1,16 +1,8 @@
 kind: pipeline
 name: braid-sample
 
-clone: 
-  disable: true
 
 steps:
-    - name: clone
-      image: alpine/git
-      commands:
-        - git clone https://gitclone.com/github.com/pojol/braidgo-sample.git .
-        - git checkout -b ${DRONE_BRANCH} remotes/origin/${DRONE_BRANCH}
-
     - name: build
       image: golang:1.13.3
       commands:
