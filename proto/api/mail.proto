@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+package api;
+
+service mail {
+    rpc send(sendMailReq) returns (sendMailRes) {}
+}
+
+message sendMailReq {
+    string accountid = 1;
+    MailBody body = 2;
+}
+
+message sendMailRes {
+    int32 errcode = 1;
+}
+
+message MailBody {
+    string title = 1;
+    string txt = 2;
+}

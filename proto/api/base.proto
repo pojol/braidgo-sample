@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package api;
+
+service base {
+    rpc acc_rename(accRenameReq) returns (accRenameRes) {}
+}
+
+message accRenameReq {
+    string Token = 1;
+    string Nickname = 2;
+}
+
+message accRenameRes {
+    string Nickname = 1;
+}

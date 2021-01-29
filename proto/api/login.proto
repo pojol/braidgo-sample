@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package api;
+
+service login {
+    rpc guest_regist(guestRegistReq) returns (guestRegistRes) {}
+}
+
+message guestRegistReq {
+    
+}
+
+message guestRegistRes {
+    string Token = 1;
+}
