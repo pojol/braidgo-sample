@@ -20,7 +20,7 @@ steps:
     - name: test
       image: golang:1.13.3
       commands:
-        - go test
+        - ls
 
     # 推送
     - name: push
