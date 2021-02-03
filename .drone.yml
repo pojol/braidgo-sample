@@ -47,7 +47,7 @@ steps:
         host: 172.17.0.3
         username: root
         ssh_key:
-          from_secret: ssh_key
+          from_secret: SSH_KEY
         port: 22
         script:
           - docker version
