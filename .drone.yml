@@ -35,6 +35,7 @@ steps:
         registry: registry.cn-hangzhou.aliyuncs.com
         no_cache:
         tags:
+          - v1.2.20
           - latest
       when:
         branch:
@@ -50,9 +51,5 @@ steps:
           from_secret: SSH_KEY
         port: 22
         script:
-          - docker version
-          - ls
-
-# 清理
-    - name: clean
-      image: appleboy/drone-ssh
+          - docker pull registry.cn-hangzhou.aliyuncs.com/braid-game/base:v1.2.20
+          - docker images
