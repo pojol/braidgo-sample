@@ -42,8 +42,17 @@ steps:
 
 # 交付
     - name: deploy
-      image: curlimages/curl
+      image: appleboy/drone-ssh
+      settings:
+        host: foo.com
+        username: root
+        key:
+        from_secret: ssh_key
+        port: 22
+        script:
+          - docker version
+          - ls
 
 # 清理
     - name: clean
-      image: curlimages/curl
+      image: appleboy/drone-ssh
