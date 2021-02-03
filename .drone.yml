@@ -46,7 +46,7 @@ steps:
       settings:
         host: 172.17.0.3
         username: root
-        key:
+        ssh_key:
           from_secret: ssh_key
         port: 22
         script:
