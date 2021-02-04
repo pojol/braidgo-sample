@@ -54,6 +54,7 @@ steps:
         port: 22
         script:
           - docker pull registry.cn-hangzhou.aliyuncs.com/braid-game/base:latest
-          - docker images
-          - docker service update --force --update-parallelism 1 base --image registry.cn-hangzhou.aliyuncs.com/braid-game/base:latest
+          - docker service update --force base --image registry.cn-hangzhou.aliyuncs.com/braid-game/base:latest
 
+# 通知
+# 清理
