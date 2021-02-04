@@ -15,5 +15,6 @@ ENV SERVICE_14202_CHECK_TIMEOUT=2s
 
 EXPOSE 14201
 
-RUN ls
+CMD [ "sh", "-c", "ls & pwd" ]
+
 ENTRYPOINT base_linux $0 $@
