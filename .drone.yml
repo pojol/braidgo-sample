@@ -13,7 +13,8 @@ steps:
       commands:
         - export GOPROXY=https://goproxy.io
         - go version
-        - go build -o base_binary base/main.go
+        - cd base/bin
+        - go build -o base_linux ../main.go
 
     # 测试
     - name: test
@@ -29,12 +30,15 @@ steps:
     # 推送
     - name: push
       image: plugins/docker
+      commands:
+        - ls
+        - cd base/bin
       settings:
         mirror: https://docker.mirrors.ustc.edu.cn
         username: pojol
         password: 
           from_secret: DOCKER_PASSWORD
-        dockerfile: base/bin/Dockerfile
+        dockerfile: Dockerfile
         repo: registry.cn-hangzhou.aliyuncs.com/braid-game/base
         registry: registry.cn-hangzhou.aliyuncs.com
         no_cache:

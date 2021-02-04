@@ -1,6 +1,6 @@
 FROM alpine
 
-COPY base_binary /home/app/
+COPY base_linux /home/app/
 
 WORKDIR /home/app
 
@@ -15,4 +15,4 @@ ENV SERVICE_14202_CHECK_TIMEOUT=2s
 
 EXPOSE 14201
 
-ENTRYPOINT ./base_binary $0 $@
+ENTRYPOINT ./base_linux $0 $@
