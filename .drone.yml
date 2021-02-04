@@ -61,3 +61,14 @@ steps:
 
 # 通知
 # 清理
+    - name: clean
+      image: appleboy/drone-ssh
+      settings:
+        host: 172.17.0.3
+        username: root
+        ssh_key:
+          from_secret: SSH_KEY
+        port: 22
+        script:
+          - docker image prune -f
+    
