@@ -39,12 +39,9 @@ steps:
           from_secret: DOCKER_PASSWORD
         repo: registry.cn-hangzhou.aliyuncs.com/braid-game/base
         registry: registry.cn-hangzhou.aliyuncs.com
-        force_tag: true
-        purge:
-        no_cache:
         tags:
           - latest
-          - v1.2.22
+          - 'v1.2.22'
 
 # 交付
     - name: deploy
