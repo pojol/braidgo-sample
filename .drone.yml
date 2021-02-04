@@ -33,6 +33,7 @@ steps:
       image: plugins/docker
       commands:
         - md5sum base_linux
+        - cat base/bin/Dockerfile
       settings:
         mirror: https://docker.mirrors.ustc.edu.cn
         username: pojol
