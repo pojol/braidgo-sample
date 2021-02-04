@@ -14,6 +14,7 @@ steps:
         - export GOPROXY=https://goproxy.io
         - go version
         - go build -o base_linux base/main.go
+        - cp base/bin/Dockerfile Dockerfile
 
     # 测试
     - name: test
@@ -35,7 +36,7 @@ steps:
         username: pojol
         password: 
           from_secret: DOCKER_PASSWORD
-        dockerfile: base/bin/Dockerfile
+        dockerfile: Dockerfile
         repo: registry.cn-hangzhou.aliyuncs.com/braid-game/base
         registry: registry.cn-hangzhou.aliyuncs.com
         no_cache:
