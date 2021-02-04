@@ -1,6 +1,6 @@
 FROM alpine
 
-COPY base_linux /home/app
+COPY ./base_linux /home/app/
 
 WORKDIR /home/app
 
