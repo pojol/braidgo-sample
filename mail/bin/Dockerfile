@@ -1,14 +1,20 @@
 FROM alpine
 
-COPY ./mail_linux /tmp/app/
+COPY mail_linux /home/app/
 
-WORKDIR /tmp/app
+WORKDIR /home/app
 
 ENV SERVICE_TAGS=braid,mail
 ENV SERVICE_14301_NAME=mail
 ENV GOTRACEBACK=crash
 
 
+# health
+ENV SERVICE_14222_CHECK_HTTP=/health
+ENV SERVICE_14222_CHECK_INTERVAL=15s
+ENV SERVICE_14222_CHECK_TIMEOUT=1s
+
+
 EXPOSE 14301
 
-ENTRYPOINT ./mail_linux $0 $@
+ENTRYPOINT mail_linux $0 $@

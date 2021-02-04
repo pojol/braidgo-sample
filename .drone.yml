@@ -14,8 +14,7 @@ steps:
         - export GOPROXY=https://goproxy.io
         - go version
         - ls
-        - CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o base_linux base/main.go
-        - md5sum base_linux
+        - CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o mail_linux mail/main.go
 
     # 测试
     - name: test
@@ -31,16 +30,13 @@ steps:
     # 推送
     - name: push
       image: plugins/docker
-      commands:
-        - md5sum base_linux
-        - cat base/bin/Dockerfile
       settings:
         mirror: https://docker.mirrors.ustc.edu.cn
         username: pojol
         password: 
           from_secret: DOCKER_PASSWORD
-        dockerfile: base/bin/Dockerfile
-        repo: registry.cn-hangzhou.aliyuncs.com/braid-game/base
+        dockerfile: mail/bin/Dockerfile
+        repo: registry.cn-hangzhou.aliyuncs.com/braid-game/mail
         registry: registry.cn-hangzhou.aliyuncs.com
         no_cache:
         tags:
@@ -56,8 +52,8 @@ steps:
           from_secret: SSH_KEY
         port: 22
         script:
-          - docker pull registry.cn-hangzhou.aliyuncs.com/braid-game/base:latest
-          - docker service update --force base --image registry.cn-hangzhou.aliyuncs.com/braid-game/base:latest
+          - docker pull registry.cn-hangzhou.aliyuncs.com/braid-game/mail:latest
+          #- docker service update --force base --image registry.cn-hangzhou.aliyuncs.com/braid-game/base:latest
 
 # 通知
 # 清理
