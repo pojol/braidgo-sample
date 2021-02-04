@@ -53,6 +53,19 @@ steps:
           #- docker service update --force base --image registry.cn-hangzhou.aliyuncs.com/braid-game/base:latest
 
 # 通知
+    - name: slack
+      image: plugins/slack
+      settings:
+        webhook: https://hooks.slack.com/services/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
+        channel: deploy
+        link_names: true
+        template: >
+          {{#success build.status}}
+            build {{build.number}} succeeded. Good job. 
+          {{else}}
+            build {{build.number}} failed. Fix me please.
+          {{/success}}
+
 
 # 清理
     - name: clean
