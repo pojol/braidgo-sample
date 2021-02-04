@@ -29,9 +29,6 @@ steps:
     # 推送
     - name: push
       image: plugins/docker
-      commands:
-        - cat Dockerfile
-        - ls
       settings:
         mirror: https://docker.mirrors.ustc.edu.cn
         username: pojol
@@ -40,8 +37,7 @@ steps:
         repo: registry.cn-hangzhou.aliyuncs.com/braid-game/base
         registry: registry.cn-hangzhou.aliyuncs.com
         tags:
-          - latest
-          - 'v1.2.22'
+          - v1.2.22
 
 # 交付
     - name: deploy
