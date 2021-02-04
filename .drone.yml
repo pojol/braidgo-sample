@@ -44,6 +44,7 @@ steps:
         no_cache:
         tags:
           - latest
+          - v1.2.22
 
 # 交付
     - name: deploy
