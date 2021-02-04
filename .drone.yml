@@ -14,7 +14,7 @@ steps:
         - export GOPROXY=https://goproxy.io
         - go version
         - ls
-        - go build -o base_linux base/main.go
+        - CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o base_linux base/main.go
         - md5sum base_linux
 
     # 测试
