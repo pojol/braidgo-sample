@@ -6,16 +6,13 @@ import (
 	"braid-game/proto"
 	"braid-game/proto/api"
 	"flag"
-	"fmt"
 	"log"
-	"net/http"
 	"os"
 	"os/signal"
 	"strconv"
 	"syscall"
 	"time"
 
-	"github.com/labstack/echo"
 	"github.com/pojol/braid"
 	"github.com/pojol/braid/modules/discoverconsul"
 	"github.com/pojol/braid/modules/electorconsul"
@@ -69,17 +66,19 @@ func main() {
 	//设置日志输出到 f
 	log.SetOutput(f)
 
-	e := echo.New()
-	e.GET("/health", func(ctx echo.Context) error {
-		fmt.Println("health check")
-		ctx.Blob(http.StatusOK, "text/plain; charset=utf-8", nil)
-		return nil
-	})
+	/*
+		e := echo.New()
+		e.GET("/health", func(ctx echo.Context) error {
+			fmt.Println("health check")
+			ctx.Blob(http.StatusOK, "text/plain; charset=utf-8", nil)
+			return nil
+		})
 
-	err = e.Start(":14202")
-	if err != nil {
-		log.Fatalf("start http server err %v", err.Error())
-	}
+		err = e.Start(":14202")
+		if err != nil {
+			log.Fatalf("start http server err %v", err.Error())
+		}
+	*/
 
 	b, _ := braid.New(
 		proto.ServiceBase,

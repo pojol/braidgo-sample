@@ -1,6 +1,6 @@
 FROM alpine
 
-COPY base_linux /home/app/
+COPY ./base_linux /home/app/
 
 WORKDIR /home/app
 
@@ -8,12 +8,7 @@ ENV SERVICE_TAGS=braid,base
 ENV SERVICE_14201_NAME=base
 ENV GOTRACEBACK=crash
 
-# health
-ENV SERVICE_14202_CHECK_HTTP=/health
-ENV SERVICE_14202_CHECK_INTERVAL=15s
-ENV SERVICE_14202_CHECK_TIMEOUT=2s
 
 EXPOSE 14201
 
-CMD ls
 ENTRYPOINT ./base_linux $0 $@
