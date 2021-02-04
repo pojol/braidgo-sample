@@ -31,6 +31,7 @@ steps:
       image: plugins/docker
       commands:
         - cat Dockerfile
+        - ls
       settings:
         mirror: https://docker.mirrors.ustc.edu.cn
         username: pojol
@@ -38,6 +39,8 @@ steps:
           from_secret: DOCKER_PASSWORD
         repo: registry.cn-hangzhou.aliyuncs.com/braid-game/base
         registry: registry.cn-hangzhou.aliyuncs.com
+        force_tag: true
+        purge:
         no_cache:
         tags:
           - latest
