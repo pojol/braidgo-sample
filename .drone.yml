@@ -1,6 +1,11 @@
 kind: pipeline
-name: braid-sample
+name: braid-sample-dev
 
+trigger:
+  branch:
+    - develop
+  event:
+    - push
 
 steps:
     - name: build
@@ -35,11 +40,7 @@ steps:
         registry: registry.cn-hangzhou.aliyuncs.com
         no_cache:
         tags:
-          - v1.2.20
           - latest
-      when:
-        branch:
-          - develop
 
 # 交付
     - name: deploy
@@ -51,5 +52,7 @@ steps:
           from_secret: SSH_KEY
         port: 22
         script:
-          - docker pull registry.cn-hangzhou.aliyuncs.com/braid-game/base:v1.2.20
+          - docker pull registry.cn-hangzhou.aliyuncs.com/braid-game/base:latest
           - docker images
+          - docker service update --force --update-parallelism 1 base --image registry.cn-hangzhou.aliyuncs.com/braid-game/base:latest
+

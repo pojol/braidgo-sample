@@ -6,6 +6,7 @@ import (
 	"braid-game/proto"
 	"braid-game/proto/api"
 	"flag"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -58,12 +59,24 @@ func main() {
 		return
 	}
 
+	// 按照所需读写权限创建文件
+	f, err := os.OpenFile("base.log", os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0644)
+	if err != nil {
+		log.Fatal(err)
+	}
+	//延迟关闭
+	defer f.Close()
+	//设置日志输出到 f
+	log.SetOutput(f)
+
 	e := echo.New()
 	e.GET("/health", func(ctx echo.Context) error {
+		fmt.Println("health check")
 		ctx.Blob(http.StatusOK, "text/plain; charset=utf-8", nil)
 		return nil
 	})
-	err := e.Start(":14222")
+
+	err = e.Start(":14202")
 	if err != nil {
 		log.Fatalf("start http server err %v", err.Error())
 	}
