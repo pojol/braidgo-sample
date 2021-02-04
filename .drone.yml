@@ -32,8 +32,6 @@ steps:
     # 推送
     - name: push
       image: plugins/docker
-      commands:
-        - ls
       settings:
         mirror: https://docker.mirrors.ustc.edu.cn
         username: pojol
@@ -44,6 +42,7 @@ steps:
         registry: registry.cn-hangzhou.aliyuncs.com
         no_cache:
         tags:
+          - v1.2.21
           - latest
 
 # 交付
