@@ -1,8 +1,8 @@
 FROM alpine
 
-COPY ./base_linux /tmp/app/
+COPY base_linux /home/app/
 
-WORKDIR /tmp/app
+WORKDIR /home/app
 
 ENV SERVICE_TAGS=braid,base
 ENV SERVICE_14201_NAME=base
