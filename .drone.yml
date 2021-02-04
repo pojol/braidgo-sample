@@ -15,6 +15,7 @@ steps:
         - go version
         - ls
         - go build -o base_linux base/main.go
+        - md5sum base_linux
 
     # 测试
     - name: test
@@ -30,6 +31,8 @@ steps:
     # 推送
     - name: push
       image: plugins/docker
+      commands:
+        - md5sum base_linux
       settings:
         mirror: https://docker.mirrors.ustc.edu.cn
         username: pojol
