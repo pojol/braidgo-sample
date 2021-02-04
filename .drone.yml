@@ -13,8 +13,7 @@ steps:
       commands:
         - export GOPROXY=https://goproxy.io
         - go version
-        - go build -o base_linux base/main.go
-        - cp base/bin/Dockerfile Dockerfile
+        - go build -o base_binary base/main.go
 
     # 测试
     - name: test
@@ -26,8 +25,6 @@ steps:
         - export MOCK_JAEGER_ADDR=http://172.18.0.1:9411/api/v2/spans
         - export MOCK_NSQD_ADDR="172.18.0.1:4150"
         - export MOCK_NSQ_LOOKUPD_ADDR="172.18.0.1:4161"
-        - cat Dockerfile
-        - md5sum base_linux
 
     # 推送
     - name: push
@@ -37,12 +34,11 @@ steps:
         username: pojol
         password: 
           from_secret: DOCKER_PASSWORD
-        dockerfile: Dockerfile
+        dockerfile: base/bin/Dockerfile
         repo: registry.cn-hangzhou.aliyuncs.com/braid-game/base
         registry: registry.cn-hangzhou.aliyuncs.com
         no_cache:
         tags:
-          - v1.2.21
           - latest
 
 # 交付
