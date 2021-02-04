@@ -15,4 +15,4 @@ ENV SERVICE_14202_CHECK_TIMEOUT=2s
 
 EXPOSE 14201
 
-CMD [ "sh", "-c", "ls & pwd" ]
+CMD [ "sh", "-c", "ls" ]
