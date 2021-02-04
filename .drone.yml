@@ -13,6 +13,7 @@ steps:
       commands:
         - export GOPROXY=https://goproxy.io
         - go version
+        - ls
         - go build -o base_linux base/main.go
 
     # 测试
