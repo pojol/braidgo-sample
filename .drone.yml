@@ -26,7 +26,8 @@ steps:
         - export MOCK_JAEGER_ADDR=http://172.18.0.1:9411/api/v2/spans
         - export MOCK_NSQD_ADDR="172.18.0.1:4150"
         - export MOCK_NSQ_LOOKUPD_ADDR="172.18.0.1:4161"
-        - ls
+        - cat Dockerfile
+        - md5sum base_linux
 
     # 推送
     - name: push
