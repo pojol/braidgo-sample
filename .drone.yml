@@ -63,3 +63,12 @@ steps:
         port: 22
         script:
           - docker image prune -f
+
+    # 通知
+    - name: notify
+      image: plugins/slack
+      settings:
+        webhook: https://hooks.slack.com/services/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
+        channel: deploy
+      when:
+        status: [ success, failure ]
