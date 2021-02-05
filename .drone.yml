@@ -56,7 +56,7 @@ steps:
     - name: slack
       image: plugins/slack
       settings:
-        webhook: https://hooks.slack.com/services/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
+        webhook: https://hooks.slack.com/services/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
         channel: deploy
         username: pojol
         when:
