@@ -66,10 +66,9 @@ steps:
 
 # 通知
     - name: notify
-      image: plugins/slack
+      image: acme/webhook
       settings:
-        webhook: https://hooks.slack.com/services/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
-        username: Drone CI
-        channel: deploy
-      when:
-        status: [ success, failure ]
+        url: https://hooks.slack.com/services/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
+        method: post
+        body: |
+          hello world
