@@ -8,6 +8,14 @@ trigger:
     - push
 
 steps:
+    # 通知
+    - name: notify
+      image: plugins/slack
+      settings:
+        webhook: https://hooks.slack.com/services/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
+        username: Drone CI
+        channel: deploy
+
     - name: build
       image: golang:1.13.3
       commands:
@@ -64,11 +72,3 @@ steps:
         script:
           - docker image prune -f
 
-# 通知
-    - name: notify
-      image: acme/webhook
-      settings:
-        url: https://hooks.slack.com/services/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
-        method: post
-        body: |
-          hello world
