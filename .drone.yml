@@ -59,13 +59,14 @@ steps:
         webhook: https://hooks.slack.com/services/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
         channel: deploy
         link_names: true
+        when:
+          status: [ success, failure ]
         template: >
           {{#success build.status}}
             build {{build.number}} succeeded. Good job. 
           {{else}}
             build {{build.number}} failed. Fix me please.
           {{/success}}
-
 
 # 清理
     - name: clean
