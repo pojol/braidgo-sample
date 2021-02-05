@@ -68,7 +68,7 @@ steps:
     - name: notify
       image: plugins/slack
       settings:
-        webhook: https://hooks.slack.com/services/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
+        webhook: https://hooks.slack.com/services/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
         channel: deploy
         username: Drone CI
       when:
