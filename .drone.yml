@@ -54,7 +54,7 @@ steps:
         port: 22
         script:
           - docker pull registry.cn-hangzhou.aliyuncs.com/braid-game/base:latest
-          #- docker service update --force base --image registry.cn-hangzhou.aliyuncs.com/braid-game/base:latest
+          - docker service update --force base --image registry.cn-hangzhou.aliyuncs.com/braid-game/base:latest
       when:
         status: [ success ]
 
