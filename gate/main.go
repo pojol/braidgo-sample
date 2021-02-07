@@ -114,6 +114,10 @@ func main() {
 	e := echo.New()
 	e.Use(bm.ReqTrace())
 	e.Use(bm.ReqLimit())
+	e.GET("/health", func(ctx echo.Context) error {
+		ctx.Blob(http.StatusOK, "text/plain; charset=utf-8", nil)
+		return nil
+	})
 	routes.Regist(e)
 
 	//go gatemid.Tick()

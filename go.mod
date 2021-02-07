@@ -14,7 +14,7 @@ require (
 	github.com/labstack/gommon v0.3.0
 	github.com/mitchellh/mapstructure v1.3.3
 	github.com/opentracing/opentracing-go v1.1.0
-	github.com/pojol/braid v1.2.10
+	github.com/pojol/braid v1.2.11
 	github.com/pojol/gobot v1.1.7
 	golang.org/x/time v0.0.0-20200416051211-89c76fbcd5d1
 	google.golang.org/grpc v1.27.1

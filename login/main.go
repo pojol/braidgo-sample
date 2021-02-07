@@ -7,12 +7,14 @@ import (
 	"braid-game/proto/api"
 	"flag"
 	"log"
+	"net/http"
 	"os"
 	"os/signal"
 	"strconv"
 	"syscall"
 	"time"
 
+	"github.com/labstack/echo"
 	"github.com/pojol/braid"
 	"github.com/pojol/braid/3rd/redis"
 	"github.com/pojol/braid/modules/discoverconsul"
@@ -69,6 +71,16 @@ func main() {
 	})
 	if err != nil {
 		log.Fatalf("redis init %s\n", err)
+	}
+
+	e := echo.New()
+	e.GET("/health", func(ctx echo.Context) error {
+		ctx.Blob(http.StatusOK, "text/plain; charset=utf-8", nil)
+		return nil
+	})
+	err = e.Start(":14102")
+	if err != nil {
+		log.Fatalf("start http server err %v", err.Error())
 	}
 
 	var rpcserver braid.Module
