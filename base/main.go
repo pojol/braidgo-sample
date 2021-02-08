@@ -6,6 +6,8 @@ import (
 	"braid-game/proto"
 	"braid-game/proto/api"
 	"flag"
+	"fmt"
+	"log"
 	"net/http"
 	"os"
 	"os/signal"
@@ -16,7 +18,6 @@ import (
 	"github.com/labstack/echo"
 	"github.com/pojol/braid"
 	"github.com/pojol/braid/module/elector"
-	"github.com/pojol/braid/module/logger"
 	"github.com/pojol/braid/module/mailbox"
 	"github.com/pojol/braid/modules/discoverconsul"
 	"github.com/pojol/braid/modules/electorconsul"
@@ -25,7 +26,6 @@ import (
 	"github.com/pojol/braid/modules/jaegertracing"
 	"github.com/pojol/braid/modules/linkerredis"
 	"github.com/pojol/braid/modules/mailboxnsq"
-	"github.com/pojol/braid/modules/zaplogger"
 	"google.golang.org/grpc"
 )
 
@@ -67,14 +67,9 @@ func main() {
 		return nil
 	})
 
-	zlb := logger.GetBuilder(zaplogger.Name)
-	zlb.AddOption(zaplogger.WithFileName("base.log"))
-	zlog, _ := zlb.Build()
-	zlog.Info("braid base sample runing ...")
-
 	err := e.Start(":14202")
 	if err != nil {
-		zlog.Fatalf("start http server err %v", err.Error())
+		log.Fatalf("start http server err %v", err.Error())
 	}
 
 	b, _ := braid.New(
@@ -125,10 +120,10 @@ func main() {
 	isub := braid.Mailbox().Sub(mailbox.Proc, elector.StateChange)
 	ic, err := isub.Shared()
 	if err != nil {
-		zlog.Fatal(err)
+		log.Fatal(err)
 	}
 	ic.OnArrived(func(msg mailbox.Message) error {
-		zlog.Debugf("elector message, state change %v", elector.DecodeStateChangeMsg(&msg).State)
+		fmt.Printf("elector message, state change %v", elector.DecodeStateChangeMsg(&msg).State)
 		return nil
 	})
 
