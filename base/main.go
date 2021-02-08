@@ -74,7 +74,7 @@ func main() {
 	}
 
 	zlb := logger.GetBuilder(zaplogger.Name)
-	zlb.AddOption(zaplogger.WithFileName("base.log"))
+	zlb.AddOption(zaplogger.WithFileName("/home/app/base.log"))
 	log, _ := zlb.Build()
 
 	b, _ := braid.New(
