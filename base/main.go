@@ -6,7 +6,6 @@ import (
 	"braid-game/proto"
 	"braid-game/proto/api"
 	"flag"
-	"log"
 	"net/http"
 	"os"
 	"os/signal"
@@ -68,15 +67,15 @@ func main() {
 		return nil
 	})
 
+	zlb := logger.GetBuilder(zaplogger.Name)
+	zlb.AddOption(zaplogger.WithFileName("base.log"))
+	zlog, _ := zlb.Build()
+	zlog.Info("braid base sample runing ...")
+
 	err := e.Start(":14202")
 	if err != nil {
-		log.Fatalf("start http server err %v", err.Error())
+		zlog.Fatalf("start http server err %v", err.Error())
 	}
-
-	zlb := logger.GetBuilder(zaplogger.Name)
-	zlb.AddOption(zaplogger.WithFileName("/home/app/base.log"))
-	log, _ := zlb.Build()
-	log.Info("braid sample runing ...")
 
 	b, _ := braid.New(
 		proto.ServiceBase,
@@ -126,10 +125,10 @@ func main() {
 	isub := braid.Mailbox().Sub(mailbox.Proc, elector.StateChange)
 	ic, err := isub.Shared()
 	if err != nil {
-		log.Fatal(err)
+		zlog.Fatal(err)
 	}
 	ic.OnArrived(func(msg mailbox.Message) error {
-		log.Debugf("elector message, state change %v", elector.DecodeStateChangeMsg(&msg).State)
+		zlog.Debugf("elector message, state change %v", elector.DecodeStateChangeMsg(&msg).State)
 		return nil
 	})
 
