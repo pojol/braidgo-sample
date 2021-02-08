@@ -1,11 +1,18 @@
-FROM golang:alpine
+FROM alpine
 
-COPY ./base_linux /tmp/app/
+COPY ./base_linux /home/app/
 
-WORKDIR /tmp/app
+WORKDIR /home/app
 
 ENV SERVICE_TAGS=braid,base
-#ENV SERVICE_14201_NAME=base
+ENV SERVICE_14201_NAME=base
+
+# health
+ENV SERVICE_CHECK_HTTP=/health
+ENV SERVICE_CHECK_INTERVAL=15s
+ENV SERVICE_CHECK_TIMEOUT=2s
+ENV SERVICE_CHECK_PORT=14202
+
 ENV GOTRACEBACK=crash
 
 EXPOSE 14201

@@ -6,12 +6,15 @@ import (
 	"braid-game/proto/api"
 	"flag"
 	"fmt"
+	"log"
+	"net/http"
 	"os"
 	"os/signal"
 	"strconv"
 	"syscall"
 	"time"
 
+	"github.com/labstack/echo"
 	"github.com/pojol/braid"
 	"github.com/pojol/braid/modules/grpcserver"
 	"github.com/pojol/braid/modules/jaegertracing"
@@ -44,6 +47,16 @@ func main() {
 	if help {
 		flag.Usage()
 		return
+	}
+
+	e := echo.New()
+	e.GET("/health", func(ctx echo.Context) error {
+		ctx.Blob(http.StatusOK, "text/plain; charset=utf-8", nil)
+		return nil
+	})
+	err := e.Start(":14302")
+	if err != nil {
+		log.Fatalf("start http server err %v", err.Error())
 	}
 
 	b, err := braid.New(NodeName)

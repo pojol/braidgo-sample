@@ -1,0 +1,82 @@
+kind: pipeline
+name: braid-sample-dev
+
+trigger:
+  branch:
+    - develop
+  event:
+    - push
+
+steps:
+    - name: build
+      image: golang:1.13.3
+      commands:
+        - export GOPROXY=https://goproxy.io
+        - CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o base_linux base/main.go
+        - cp base/bin/Dockerfile Dockerfile
+      when:
+        status: [ success ]
+
+    # 测试
+    - name: test
+      image: golang:1.13.3
+      commands:
+        - export GOPROXY=https://goproxy.io
+        - export MOCK_REDIS_ADDR=redis://172.18.0.1:6379/0
+        - export MOCK_CONSUL_ADDR=http://172.18.0.1:8900
+        - export MOCK_JAEGER_ADDR=http://172.18.0.1:9411/api/v2/spans
+        - export MOCK_NSQD_ADDR="172.18.0.1:4150"
+        - export MOCK_NSQ_LOOKUPD_ADDR="172.18.0.1:4161"
+
+    # 推送
+    - name: push
+      image: plugins/docker
+      settings:
+        mirror: https://docker.mirrors.ustc.edu.cn
+        username: pojol
+        password: 
+          from_secret: DOCKER_PASSWORD
+        repo: registry.cn-hangzhou.aliyuncs.com/braid-game/base
+        registry: registry.cn-hangzhou.aliyuncs.com
+        tags:
+          - latest
+      when:
+        status: [ success ]
+
+# 交付
+    - name: deploy
+      image: appleboy/drone-ssh
+      settings:
+        host: 172.17.0.3
+        username: root
+        ssh_key:
+          from_secret: SSH_KEY
+        port: 22
+        script:
+          - docker pull registry.cn-hangzhou.aliyuncs.com/braid-game/base:latest
+          - docker service update --force base --image registry.cn-hangzhou.aliyuncs.com/braid-game/base:latest
+      when:
+        status: [ success ]
+
+# 清理
+    - name: clean
+      image: appleboy/drone-ssh
+      settings:
+        host: 172.17.0.3
+        username: root
+        ssh_key:
+          from_secret: SSH_KEY
+        port: 22
+        script:
+          - docker image prune -f
+      when:
+        status: [ success ]
+
+    # 通知
+    - name: notify
+      image: plugins/slack
+      settings:
+        webhook:
+          from_secret: SLACK_WEBHOOK
+      when:
+        status: [ success, failure ]
