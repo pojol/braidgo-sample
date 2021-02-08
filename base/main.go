@@ -15,7 +15,6 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/labstack/echo"
 	"github.com/pojol/braid"
 	"github.com/pojol/braid/module/elector"
 	"github.com/pojol/braid/module/mailbox"
@@ -59,17 +58,6 @@ func main() {
 	if help {
 		flag.Usage()
 		return
-	}
-
-	e := echo.New()
-	e.GET("/health", func(ctx echo.Context) error {
-		ctx.Blob(http.StatusOK, "text/plain; charset=utf-8", nil)
-		return nil
-	})
-
-	err := e.Start(":14202")
-	if err != nil {
-		log.Fatalf("start http server err %v", err.Error())
 	}
 
 	b, _ := braid.New(
@@ -130,6 +118,13 @@ func main() {
 	b.Init()
 	b.Run()
 	defer b.Close()
+
+	go func() {
+		http.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
+
+		})
+		http.ListenAndServe(":14202", nil)
+	}()
 
 	ch := make(chan os.Signal)
 	signal.Notify(ch, syscall.SIGTERM, syscall.SIGINT)
