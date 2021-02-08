@@ -16,6 +16,9 @@ import (
 
 	"github.com/labstack/echo"
 	"github.com/pojol/braid"
+	"github.com/pojol/braid/module/elector"
+	"github.com/pojol/braid/module/logger"
+	"github.com/pojol/braid/module/mailbox"
 	"github.com/pojol/braid/modules/discoverconsul"
 	"github.com/pojol/braid/modules/electorconsul"
 	"github.com/pojol/braid/modules/grpcclient"
@@ -23,6 +26,7 @@ import (
 	"github.com/pojol/braid/modules/jaegertracing"
 	"github.com/pojol/braid/modules/linkerredis"
 	"github.com/pojol/braid/modules/mailboxnsq"
+	"github.com/pojol/braid/modules/zaplogger"
 	"google.golang.org/grpc"
 )
 
@@ -69,6 +73,10 @@ func main() {
 		log.Fatalf("start http server err %v", err.Error())
 	}
 
+	zlb := logger.GetBuilder(zaplogger.Name)
+	zlb.AddOption(zaplogger.WithFileName("base.log"))
+	log, _ := zlb.Build()
+
 	b, _ := braid.New(
 		proto.ServiceBase,
 		mailboxnsq.WithLookupAddr([]string{nsqLookupAddr}),
@@ -113,6 +121,16 @@ func main() {
 		))
 
 	api.RegisterBaseServer(braid.GetServer().(*grpc.Server), &handle.BaseServer{})
+
+	isub := braid.Mailbox().Sub(mailbox.Proc, elector.StateChange)
+	ic, err := isub.Shared()
+	if err != nil {
+		log.Fatal(err)
+	}
+	ic.OnArrived(func(msg mailbox.Message) error {
+		log.Debugf("elector message, state change %v", elector.DecodeStateChangeMsg(&msg).State)
+		return nil
+	})
 
 	b.Init()
 	b.Run()
