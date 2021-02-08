@@ -76,6 +76,7 @@ func main() {
 	zlb := logger.GetBuilder(zaplogger.Name)
 	zlb.AddOption(zaplogger.WithFileName("/home/app/base.log"))
 	log, _ := zlb.Build()
+	log.Info("braid sample runing ...")
 
 	b, _ := braid.New(
 		proto.ServiceBase,
