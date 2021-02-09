@@ -62,7 +62,7 @@ func main() {
 		flag.Usage()
 		return
 	}
-	ports := []string{"http://172.17.0.3:14001", "http://172.17.20.10:14001" /*, "14003"*/}
+	ports := []string{"http://localhost:14001" /*, "14003"*/}
 	fmt.Println("targets", ports)
 	fmt.Println("num", num)
 	fmt.Println("increase", increase)

@@ -1,7 +1,6 @@
 package main
 
 import (
-	bm "braid-game/gate/middleware"
 	"braid-game/gate/routes"
 	"context"
 	"flag"
@@ -79,8 +78,8 @@ func main() {
 	defer b.Close()
 
 	e := echo.New()
-	e.Use(bm.ReqTrace())
-	e.Use(bm.ReqLimit())
+	//e.Use(bm.ReqTrace())
+	//e.Use(bm.ReqLimit())
 	routes.Regist(e)
 
 	err = e.Start(":14001")
