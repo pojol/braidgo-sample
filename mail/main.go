@@ -1,23 +1,15 @@
 package main
 
 import (
-	"braid-game/common"
 	"braid-game/mail/handle"
 	"braid-game/proto/api"
 	"flag"
-	"fmt"
-	"log"
-	"net/http"
 	"os"
 	"os/signal"
-	"strconv"
 	"syscall"
-	"time"
 
-	"github.com/labstack/echo"
 	"github.com/pojol/braid"
 	"github.com/pojol/braid/modules/grpcserver"
-	"github.com/pojol/braid/modules/jaegertracing"
 	"google.golang.org/grpc"
 )
 
@@ -49,50 +41,9 @@ func main() {
 		return
 	}
 
-	e := echo.New()
-	e.GET("/health", func(ctx echo.Context) error {
-		ctx.Blob(http.StatusOK, "text/plain; charset=utf-8", nil)
-		return nil
-	})
-	err := e.Start(":14302")
-	if err != nil {
-		log.Fatalf("start http server err %v", err.Error())
-	}
+	b, _ := braid.New(NodeName)
 
-	b, err := braid.New(NodeName)
-	if err != nil {
-		fmt.Println(err.Error())
-		panic(err)
-	}
-
-	var rpcserver braid.Module
-	if localPort == 0 {
-		rpcserver = braid.Server(grpcserver.Name, grpcserver.WithListen(":14301"))
-	} else {
-		addr := ":" + strconv.Itoa(localPort)
-		rpcserver = braid.Server(grpcserver.Name, grpcserver.WithListen(addr))
-
-		id := strconv.Itoa(int(time.Now().UnixNano())) + addr
-		err := common.Regist(common.ConsulRegistReq{
-			Name:    NodeName,
-			ID:      id,
-			Tags:    []string{"braid", NodeName},
-			Address: "127.0.0.1",
-			Port:    localPort,
-		}, consulAddr)
-		if err != nil {
-			panic(err.Error())
-		}
-
-		defer common.Deregist(id, consulAddr)
-	}
-
-	b.RegistModule(
-		rpcserver,
-		braid.Tracing(jaegertracing.Name,
-			jaegertracing.WithHTTP(jaegerAddr),
-			jaegertracing.WithProbabilistic(0.1),
-		))
+	b.RegistModule(braid.Server(grpcserver.Name, grpcserver.WithListen(":14301")))
 
 	api.RegisterMailServer(braid.GetServer().(*grpc.Server), &handle.MailServer{})
 

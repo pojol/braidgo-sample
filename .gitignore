@@ -40,3 +40,6 @@ login/bin/make.sh
 login/bin/push.sh
 login/bin/run1.sh
 login/bin/run2.sh
+gateway_linux
+login_linux
+mail_linux

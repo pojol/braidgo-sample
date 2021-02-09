@@ -1,6 +1,6 @@
 ## BraidSample
 `braid@v1.1.13`
-> 使用braid微服务构建的框架，可适用于网站，应用，游戏等业务的后端。
+> 使用[braid-go](https://github.com/pojol/braid-go)微服务构建的框架，可适用于网站，应用，游戏等业务的后端。
 
 [![image.png](https://i.postimg.cc/QtrF7jsR/image.png)](https://postimg.cc/JyP7VVsq)
 
