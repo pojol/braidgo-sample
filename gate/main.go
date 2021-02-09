@@ -1,19 +1,13 @@
 package main
 
 import (
-	"braid-game/common"
-	bm "braid-game/gate/middleware"
 	"braid-game/gate/routes"
 	"context"
 	"flag"
-	"fmt"
 	"os"
 	"os/signal"
-	"strconv"
 	"syscall"
-	"time"
 
-	"net/http"
 	_ "net/http/pprof"
 
 	"github.com/labstack/echo/v4"
@@ -22,8 +16,6 @@ import (
 	"github.com/pojol/braid/modules/discoverconsul"
 	"github.com/pojol/braid/modules/electorconsul"
 	"github.com/pojol/braid/modules/grpcclient"
-	"github.com/pojol/braid/modules/jaegertracing"
-	"github.com/pojol/braid/modules/linkerredis"
 	"github.com/pojol/braid/modules/mailboxnsq"
 )
 
@@ -58,31 +50,11 @@ func main() {
 
 	initFlag()
 	var err error
-	//var kubeconfig = flag.String("kubeconfig", "", "absolute path to the kubeconfig file")
-	//var nodeID = flag.String("node-id", "", "node id used for leader election")
 
 	flag.Parse()
 	if help {
 		flag.Usage()
 		return
-	}
-
-	if localPort != 0 {
-		addr := ":" + strconv.Itoa(localPort)
-
-		id := strconv.Itoa(int(time.Now().UnixNano())) + addr
-		err := common.Regist(common.ConsulRegistReq{
-			Name:    NodeName,
-			ID:      id,
-			Tags:    []string{"braid", NodeName},
-			Address: "127.0.0.1",
-			Port:    localPort,
-		}, consulAddr)
-		if err != nil {
-			panic(err.Error())
-		}
-
-		defer common.Deregist(id, consulAddr)
 	}
 
 	b, _ := braid.New(
@@ -99,38 +71,18 @@ func main() {
 			electorconsul.Name,
 			electorconsul.WithConsulAddr(consulAddr),
 		),
-		braid.LinkCache(linkerredis.Name,
-			linkerredis.WithRedisAddr(redisAddr),
-		),
-		braid.Tracing(jaegertracing.Name,
-			jaegertracing.WithHTTP(jaegerAddr),
-			jaegertracing.WithProbabilistic(0.1),
-		))
+	)
 
 	b.Init()
 	b.Run()
 	defer b.Close()
 
 	e := echo.New()
-	e.Use(bm.ReqTrace())
-	e.Use(bm.ReqLimit())
-	e.GET("/health", func(ctx echo.Context) error {
-		ctx.Blob(http.StatusOK, "text/plain; charset=utf-8", nil)
-		return nil
-	})
+	//e.Use(bm.ReqTrace())
+	//e.Use(bm.ReqLimit())
 	routes.Regist(e)
 
-	//go gatemid.Tick()
-
-	go func() {
-		fmt.Println(http.ListenAndServe(":6060", nil))
-	}()
-
-	if localPort == 0 {
-		err = e.Start(":14001")
-	} else {
-		err = e.Start(":" + strconv.Itoa(localPort))
-	}
+	err = e.Start(":14001")
 	if err != nil {
 		log.Fatalf("start echo err %s", err.Error())
 	}
