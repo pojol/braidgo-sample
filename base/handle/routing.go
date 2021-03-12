@@ -1,8 +1,14 @@
 package handle
 
 import (
+	"braid-game/base/constant"
+	"braid-game/errcode"
+	"braid-game/proto"
 	"braid-game/proto/api"
 	"context"
+	"errors"
+
+	"github.com/pojol/braid-go"
 )
 
 // BaseServer 基础业务服务节点
@@ -15,6 +21,27 @@ func (bs *BaseServer) AccRename(ctx context.Context, req *api.AccRenameReq) (res
 
 	res = new(api.AccRenameRes)
 	res.Nickname = req.Nickname
+
+	mailRes := &api.SendMailRes{}
+
+	braid.GetClient().Invoke(ctx,
+		proto.ServiceMail,
+		proto.APIMailSend,
+		req.Token,
+		&api.SendMailReq{
+			Accountid: "acc_xx",
+			Body: &api.MailBody{
+				Title: "welcome!",
+			},
+			Record: int32(constant.BaseRandRecord),
+		},
+		mailRes,
+	)
+
+	if mailRes.Errcode != int32(errcode.Succ) {
+		return res, errors.New("send mail fail")
+	}
+	res.Record = mailRes.Record
 
 	return res, err
 }

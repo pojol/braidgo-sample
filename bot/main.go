@@ -11,7 +11,7 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/pojol/gobot/factory"
+	"github.com/pojol/httpbot/factory"
 )
 
 var (
@@ -62,7 +62,7 @@ func main() {
 		flag.Usage()
 		return
 	}
-	ports := []string{"http://localhost:14001" /*, "14003"*/}
+	ports := []string{"http://127.0.0.1:14001" /*, "14003"*/}
 	fmt.Println("targets", ports)
 	fmt.Println("num", num)
 	fmt.Println("increase", increase)

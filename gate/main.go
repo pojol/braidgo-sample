@@ -4,6 +4,7 @@ import (
 	"braid-game/gate/routes"
 	"context"
 	"flag"
+	"log"
 	"os"
 	"os/signal"
 	"syscall"
@@ -11,12 +12,12 @@ import (
 	_ "net/http/pprof"
 
 	"github.com/labstack/echo/v4"
-	"github.com/pojol/braid"
-	"github.com/pojol/braid/3rd/log"
-	"github.com/pojol/braid/modules/discoverconsul"
-	"github.com/pojol/braid/modules/electorconsul"
-	"github.com/pojol/braid/modules/grpcclient"
-	"github.com/pojol/braid/modules/mailboxnsq"
+	"github.com/pojol/braid-go"
+	"github.com/pojol/braid-go/modules/discoverconsul"
+	"github.com/pojol/braid-go/modules/electorconsul"
+	"github.com/pojol/braid-go/modules/grpcclient"
+	"github.com/pojol/braid-go/modules/linkerredis"
+	"github.com/pojol/braid-go/modules/mailboxnsq"
 )
 
 var (
@@ -56,6 +57,7 @@ func main() {
 		flag.Usage()
 		return
 	}
+	routes.Linkcheckmap = make(map[string]int)
 
 	b, _ := braid.New(
 		NodeName,
@@ -67,6 +69,9 @@ func main() {
 			discoverconsul.Name,
 			discoverconsul.WithConsulAddr(consulAddr)),
 		braid.Client(grpcclient.Name),
+		braid.LinkCache(linkerredis.Name,
+			linkerredis.WithRedisAddr(redisAddr),
+		),
 		braid.Elector(
 			electorconsul.Name,
 			electorconsul.WithConsulAddr(consulAddr),

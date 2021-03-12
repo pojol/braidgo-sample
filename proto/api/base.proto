@@ -9,8 +9,10 @@ service base {
 message accRenameReq {
     string Token = 1;
     string Nickname = 2;
+
 }
 
 message accRenameRes {
     string Nickname = 1;
+    int32 Record = 2;
 }

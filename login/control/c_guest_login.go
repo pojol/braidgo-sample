@@ -2,12 +2,13 @@ package control
 
 import (
 	"braid-game/proto/api"
+	"fmt"
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/pojol/braid"
-	"github.com/pojol/braid/module/mailbox"
-	"github.com/pojol/braid/modules/linkerredis"
+	"github.com/pojol/braid-go"
+	"github.com/pojol/braid-go/module/linkcache"
+	"github.com/pojol/braid-go/module/mailbox"
 )
 
 // GuestLogin 游客登录
@@ -18,7 +19,8 @@ func GuestLogin(res *api.GuestRegistRes) error {
 	res.Token = uuid.New().String()
 
 	time.AfterFunc(time.Minute, func() {
-		braid.Mailbox().Pub(mailbox.Cluster, linkerredis.LinkerTopicUnlink, &mailbox.Message{
+		fmt.Println("send unlink msg", res.Token)
+		braid.Mailbox().Pub(mailbox.Cluster, linkcache.TopicUnlink, &mailbox.Message{
 			Body: []byte(res.Token),
 		})
 	})

@@ -1,15 +1,18 @@
 package main
 
 import (
+	"braid-game/mail/constant"
 	"braid-game/mail/handle"
 	"braid-game/proto/api"
 	"flag"
+	"math/rand"
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 
-	"github.com/pojol/braid"
-	"github.com/pojol/braid/modules/grpcserver"
+	"github.com/pojol/braid-go"
+	"github.com/pojol/braid-go/modules/grpcserver"
 	"google.golang.org/grpc"
 )
 
@@ -34,6 +37,7 @@ func initFlag() {
 
 func main() {
 	initFlag()
+	rand.Seed(time.Now().UnixNano())
 
 	flag.Parse()
 	if help {
@@ -41,9 +45,13 @@ func main() {
 		return
 	}
 
+	constant.MailRandRecord = rand.Intn(10000)
+
 	b, _ := braid.New(NodeName)
 
-	b.RegistModule(braid.Server(grpcserver.Name, grpcserver.WithListen(":14301")))
+	b.RegistModule(
+		braid.Server(grpcserver.Name, grpcserver.WithListen(":14301")),
+	)
 
 	api.RegisterMailServer(braid.GetServer().(*grpc.Server), &handle.MailServer{})
 

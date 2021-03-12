@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"time"
 
-	bot "github.com/pojol/gobot"
+	bot "github.com/pojol/httpbot"
 )
 
 // FactoryDefault 默认的机器人工厂

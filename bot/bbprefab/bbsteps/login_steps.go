@@ -4,7 +4,7 @@ import (
 	"braid-game/bot/bbprefab"
 	"braid-game/bot/bbprefab/bbcards"
 
-	"github.com/pojol/gobot/prefab"
+	"github.com/pojol/httpbot/prefab"
 )
 
 // NewGuestLoginStep guest

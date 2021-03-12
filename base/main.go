@@ -1,19 +1,23 @@
 package main
 
 import (
+	"braid-game/base/constant"
 	"braid-game/base/handle"
 	"braid-game/proto"
 	"braid-game/proto/api"
 	"flag"
+	"math/rand"
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 
-	"github.com/pojol/braid"
-	"github.com/pojol/braid/modules/discoverconsul"
-	"github.com/pojol/braid/modules/grpcclient"
-	"github.com/pojol/braid/modules/grpcserver"
-	"github.com/pojol/braid/modules/mailboxnsq"
+	"github.com/pojol/braid-go"
+	"github.com/pojol/braid-go/modules/discoverconsul"
+	"github.com/pojol/braid-go/modules/grpcclient"
+	"github.com/pojol/braid-go/modules/grpcserver"
+	"github.com/pojol/braid-go/modules/linkerredis"
+	"github.com/pojol/braid-go/modules/mailboxnsq"
 	"google.golang.org/grpc"
 )
 
@@ -42,12 +46,15 @@ func initFlag() {
 
 func main() {
 	initFlag()
+	rand.Seed(time.Now().UnixNano())
 
 	flag.Parse()
 	if help {
 		flag.Usage()
 		return
 	}
+
+	constant.BaseRandRecord = rand.Intn(10000)
 
 	b, _ := braid.New(
 		proto.ServiceBase,
@@ -58,6 +65,10 @@ func main() {
 		braid.Discover(
 			discoverconsul.Name,
 			discoverconsul.WithConsulAddr(consulAddr)),
+		braid.LinkCache(linkerredis.Name,
+			linkerredis.WithRedisAddr(redisAddr),
+			linkerredis.WithMode(linkerredis.LinkerRedisModeLocal),
+		),
 		braid.Client(grpcclient.Name),
 		braid.Server(grpcserver.Name, grpcserver.WithListen(":14201")),
 	)

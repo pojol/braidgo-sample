@@ -1,6 +1,7 @@
 package handle
 
 import (
+	"braid-game/mail/constant"
 	"braid-game/mail/control"
 	"braid-game/mail/model"
 	"braid-game/proto/api"
@@ -21,6 +22,7 @@ func (ms *MailServer) Send(ctx context.Context, req *api.SendMailReq) (*api.Send
 		Txt:   req.Body.Txt,
 	})
 	res.Errcode = int32(errcode)
+	res.Record = int32(constant.MailRandRecord + int(req.Record))
 
 	return res, nil
 }
