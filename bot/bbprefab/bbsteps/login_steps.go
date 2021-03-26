@@ -4,13 +4,13 @@ import (
 	"braid-game/bot/bbprefab"
 	"braid-game/bot/bbprefab/bbcards"
 
-	"github.com/pojol/httpbot/prefab"
+	"github.com/pojol/httpbot/timeline"
 )
 
 // NewGuestLoginStep guest
-func NewGuestLoginStep(md *bbprefab.BotData) *prefab.Step {
+func NewGuestLoginStep(md *bbprefab.BotData) *timeline.Step {
 
-	step := prefab.NewStep()
+	step := timeline.NewStep()
 
 	step.AddCard(bbcards.NewGuestLoginCard(md))
 

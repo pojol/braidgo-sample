@@ -1,6 +1,7 @@
 package main
 
 import (
+	bm "braid-game/gate/middleware"
 	"braid-game/gate/routes"
 	"context"
 	"flag"
@@ -16,6 +17,7 @@ import (
 	"github.com/pojol/braid-go/modules/discoverconsul"
 	"github.com/pojol/braid-go/modules/electorconsul"
 	"github.com/pojol/braid-go/modules/grpcclient"
+	"github.com/pojol/braid-go/modules/jaegertracing"
 	"github.com/pojol/braid-go/modules/linkerredis"
 	"github.com/pojol/braid-go/modules/mailboxnsq"
 )
@@ -76,6 +78,11 @@ func main() {
 			electorconsul.Name,
 			electorconsul.WithConsulAddr(consulAddr),
 		),
+		braid.Tracing(
+			jaegertracing.Name,
+			jaegertracing.WithHTTP(jaegerAddr),
+			jaegertracing.WithProbabilistic(1),
+		),
 	)
 
 	b.Init()
@@ -83,7 +90,7 @@ func main() {
 	defer b.Close()
 
 	e := echo.New()
-	//e.Use(bm.ReqTrace())
+	e.Use(bm.ReqTrace())
 	//e.Use(bm.ReqLimit())
 	routes.Regist(e)
 

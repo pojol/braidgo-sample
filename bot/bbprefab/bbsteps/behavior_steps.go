@@ -4,13 +4,13 @@ import (
 	"braid-game/bot/bbprefab"
 	"braid-game/bot/bbprefab/bbcards"
 
-	"github.com/pojol/httpbot/prefab"
+	"github.com/pojol/httpbot/timeline"
 )
 
 // NewRenameStep rename
-func NewRenameStep(md *bbprefab.BotData) *prefab.Step {
+func NewRenameStep(md *bbprefab.BotData) *timeline.Step {
 
-	step := prefab.NewStep()
+	step := timeline.NewStep()
 
 	step.AddCard(bbcards.NewRenameCard(md))
 

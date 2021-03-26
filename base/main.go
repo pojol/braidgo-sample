@@ -16,6 +16,7 @@ import (
 	"github.com/pojol/braid-go/modules/discoverconsul"
 	"github.com/pojol/braid-go/modules/grpcclient"
 	"github.com/pojol/braid-go/modules/grpcserver"
+	"github.com/pojol/braid-go/modules/jaegertracing"
 	"github.com/pojol/braid-go/modules/linkerredis"
 	"github.com/pojol/braid-go/modules/mailboxnsq"
 	"google.golang.org/grpc"
@@ -71,6 +72,11 @@ func main() {
 		),
 		braid.Client(grpcclient.Name),
 		braid.Server(grpcserver.Name, grpcserver.WithListen(":14201")),
+		braid.Tracing(
+			jaegertracing.Name,
+			jaegertracing.WithHTTP(jaegerAddr),
+			jaegertracing.WithProbabilistic(1),
+		),
 	)
 
 	api.RegisterBaseServer(braid.GetServer().(*grpc.Server), &handle.BaseServer{})

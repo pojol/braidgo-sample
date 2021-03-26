@@ -82,10 +82,8 @@ func main() {
 
 	client := &http.Client{}
 	f, err := factory.Create(
-		factory.WithAddr(ports),
 		factory.WithCreateNum(num),
-		factory.WithMode(mode),
-		factory.WithStrategy(strategyParm),
+		factory.WithRunMode(mode),
 		factory.WithClient(client),
 		factory.WithLifeTime(time.Duration(lifetime)*time.Second),
 	)

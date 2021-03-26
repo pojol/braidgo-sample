@@ -11,7 +11,7 @@ require (
 	github.com/pojol/braid-go v1.2.13
 	github.com/pojol/httpbot v0.0.0-00010101000000-000000000000
 	golang.org/x/time v0.0.0-20200416051211-89c76fbcd5d1
-	google.golang.org/grpc v1.27.1
+	google.golang.org/grpc v1.29.1
 	honnef.co/go/tools v0.0.1-2020.1.5 // indirect
 )
 
