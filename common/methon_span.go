@@ -33,7 +33,7 @@ func CreateMethonSpanFactory() tracer.SpanFactory {
 }
 
 // Begin 开始监听
-func (r *MethonTracer) Begin(ctx interface{}, tags ...tracer.SpanTag) {
+func (r *MethonTracer) Begin(ctx interface{}) {
 
 	mthonctx, ok := ctx.(context.Context)
 	if !ok {
@@ -43,12 +43,15 @@ func (r *MethonTracer) Begin(ctx interface{}, tags ...tracer.SpanTag) {
 	parentSpan := opentracing.SpanFromContext(mthonctx)
 	if parentSpan != nil {
 		r.span = r.tracing.StartSpan("MethonSpan", opentracing.ChildOf(parentSpan.Context()))
-		for _, v := range tags {
-			r.span.SetTag(v.Key, v.Val)
-		}
 	}
 
 	r.starting = true
+}
+
+func (r *MethonTracer) SetTag(key string, val interface{}) {
+	if r.span != nil {
+		r.span.SetTag(key, val)
+	}
 }
 
 // End 结束监听
