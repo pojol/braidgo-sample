@@ -1,8 +1,8 @@
 package main
 
 import (
-	"braid-game/base/constant"
 	"braid-game/base/handle"
+	"braid-game/common"
 	"braid-game/proto"
 	"braid-game/proto/api"
 	"flag"
@@ -55,8 +55,6 @@ func main() {
 		return
 	}
 
-	constant.BaseRandRecord = rand.Intn(10000)
-
 	b, _ := braid.New(
 		proto.ServiceBase,
 		mailboxnsq.WithLookupAddr([]string{nsqLookupAddr}),
@@ -76,6 +74,20 @@ func main() {
 			jaegertracing.Name,
 			jaegertracing.WithHTTP(jaegerAddr),
 			jaegertracing.WithProbabilistic(1),
+			jaegertracing.WithSpanFactory(
+				jaegertracing.SpanFactory{
+					Name:    "tracer_span_echo",
+					Factory: jaegertracing.CreateEchoTraceSpan(),
+				},
+				jaegertracing.SpanFactory{
+					Name:    "tracer_span_redis",
+					Factory: jaegertracing.CreateRedisSpanFactory(),
+				},
+				jaegertracing.SpanFactory{
+					Name:    "tracer_span_methon",
+					Factory: common.CreateMethonSpanFactory(),
+				},
+			),
 		),
 	)
 

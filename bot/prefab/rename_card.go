@@ -1,7 +1,6 @@
-package bbcards
+package prefab
 
 import (
-	"braid-game/bot/bbprefab"
 	"braid-game/proto/request"
 	"encoding/json"
 	"fmt"
@@ -9,22 +8,22 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/pojol/httpbot/prefab"
+	"github.com/pojol/httpbot/card"
 )
 
 // RenameCard 改名
 type RenameCard struct {
-	Base  *prefab.Card
+	Base  *card.Card
 	URL   string
 	delay time.Duration
-	md    *bbprefab.BotData
+	md    *BotData
 }
 
 // NewRenameCard 修改昵称
-func NewRenameCard(md *bbprefab.BotData) *RenameCard {
+func NewRenameCard(md *BotData) *RenameCard {
 	return &RenameCard{
-		Base:  prefab.NewCardWithConfig(),
-		URL:   "http://123.207.198.57:14001/v1/base/rename",
+		Base:  card.NewCardWithConfig(),
+		URL:   "http://127.0.0.1:14001/v1/base/rename",
 		delay: time.Millisecond,
 		md:    md,
 	}
@@ -53,6 +52,8 @@ func (card *RenameCard) GetDelay() time.Duration { return card.delay }
 // Enter 序列化传入消息体
 func (card *RenameCard) Enter() []byte {
 
+	card.Base.Inject(card)
+
 	card.Base.Header["token"] = card.md.AccToken
 
 	req := request.AccountRenameReq{
@@ -70,10 +71,16 @@ func (card *RenameCard) Enter() []byte {
 // Leave 反序列化返回消息
 func (card *RenameCard) Leave(res *http.Response) error {
 
+	var err error
+
 	errcode, _ := strconv.Atoi(res.Header["Errcode"][0])
 	if errcode != 0 {
-		fmt.Println(res.Request.URL, card.GetURL(), "request err", errcode)
+		err = fmt.Errorf("request err %v", errcode)
+		goto EXT
 	}
 
-	return nil
+	err = card.Base.Assert()
+
+EXT:
+	return err
 }

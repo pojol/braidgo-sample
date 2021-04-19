@@ -59,7 +59,6 @@ func main() {
 		flag.Usage()
 		return
 	}
-	routes.Linkcheckmap = make(map[string]int)
 
 	b, _ := braid.New(
 		NodeName,

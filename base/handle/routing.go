@@ -1,7 +1,6 @@
 package handle
 
 import (
-	"braid-game/base/constant"
 	"braid-game/errcode"
 	"braid-game/proto"
 	"braid-game/proto/api"
@@ -23,6 +22,25 @@ func (bs *BaseServer) AccRename(ctx context.Context, req *api.AccRenameReq) (res
 	res.Nickname = req.Nickname
 
 	mailRes := &api.SendMailRes{}
+	/*
+		tracing := braid.Tracer()
+		if tracing != nil {
+			span, err := tracing.GetSpan("tracer_span_methon")
+			if err == nil {
+				span.Begin(ctx, tracer.SpanTag{
+					Key: "methon",
+					Val: "AccRename",
+				}, tracer.SpanTag{
+					Key: "ReqParm",
+					Val: req,
+				}, tracer.SpanTag{
+					Key: "ResParm",
+					Val: mailRes,
+				})
+				defer span.End(ctx)
+			}
+		}
+	*/
 
 	braid.GetClient().Invoke(ctx,
 		proto.ServiceMail,
@@ -33,7 +51,6 @@ func (bs *BaseServer) AccRename(ctx context.Context, req *api.AccRenameReq) (res
 			Body: &api.MailBody{
 				Title: "welcome!",
 			},
-			Record: int32(constant.BaseRandRecord),
 		},
 		mailRes,
 	)
@@ -41,7 +58,6 @@ func (bs *BaseServer) AccRename(ctx context.Context, req *api.AccRenameReq) (res
 	if mailRes.Errcode != int32(errcode.Succ) {
 		return res, errors.New("send mail fail")
 	}
-	res.Record = mailRes.Record
 
 	return res, err
 }

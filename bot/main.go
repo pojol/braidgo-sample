@@ -1,14 +1,11 @@
 package main
 
 import (
-	"braid-game/bot/bstrategy"
+	"braid-game/bot/arrange"
 	"flag"
 	"fmt"
 	"math/rand"
 	"net/http"
-	"os"
-	"os/signal"
-	"syscall"
 	"time"
 
 	"github.com/pojol/httpbot/factory"
@@ -62,8 +59,6 @@ func main() {
 		flag.Usage()
 		return
 	}
-	ports := []string{"http://127.0.0.1:14001" /*, "14003"*/}
-	fmt.Println("targets", ports)
 	fmt.Println("num", num)
 	fmt.Println("increase", increase)
 	fmt.Println("lifetime", lifetime)
@@ -91,13 +86,7 @@ func main() {
 		panic(err)
 	}
 
-	f.Append(bstrategy.Default, bstrategy.FactoryDefault)
+	f.Append(arrange.StrategyDefault, arrange.NewStrategyDefault)
 	f.Run()
-
-	ch := make(chan os.Signal)
-	signal.Notify(ch, syscall.SIGTERM, syscall.SIGINT)
-
-	<-ch
 	f.Close()
-	time.Sleep(time.Second)
 }
