@@ -87,6 +87,9 @@ func main() {
 	}
 
 	f.Append(arrange.StrategyDefault, arrange.NewStrategyDefault)
+
 	f.Run()
 	f.Close()
+
+	time.Sleep(time.Second * 2)
 }

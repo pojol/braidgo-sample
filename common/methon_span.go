@@ -6,6 +6,7 @@ import (
 
 	"github.com/opentracing/opentracing-go"
 	"github.com/pojol/braid-go/module/tracer"
+	"github.com/uber/jaeger-client-go"
 )
 
 // MethonTracer methon tracer
@@ -52,6 +53,16 @@ func (r *MethonTracer) SetTag(key string, val interface{}) {
 	if r.span != nil {
 		r.span.SetTag(key, val)
 	}
+}
+
+func (r *MethonTracer) GetID() string {
+	if r.span != nil {
+		if sc, ok := r.span.Context().(jaeger.SpanContext); ok {
+			return sc.TraceID().String()
+		}
+	}
+
+	return ""
 }
 
 // End 结束监听

@@ -29,7 +29,8 @@ var (
 	redisAddr     string
 	jaegerAddr    string
 	nsqLookupAddr string
-	nsqdAddr      string
+	nsqdTCP       string
+	nsqdHttp      string
 	localPort     int
 )
 
@@ -44,8 +45,9 @@ func initFlag() {
 	flag.StringVar(&consulAddr, "consul", "http://127.0.0.1:8500", "set consul address")
 	flag.StringVar(&redisAddr, "redis", "redis://127.0.0.1:6379/0", "set redis address")
 	flag.StringVar(&jaegerAddr, "jaeger", "http://127.0.0.1:9411/api/v2/spans", "set jaeger address")
-	flag.StringVar(&nsqLookupAddr, "nsqlookup", "127.0.0.1:4161", "set nsq lookup address")
-	flag.StringVar(&nsqdAddr, "nsqd", "127.0.0.1:4150", "set nsqd address")
+	flag.StringVar(&nsqLookupAddr, "nsqlookupd", "127.0.0.1:4161", "set nsq lookup address")
+	flag.StringVar(&nsqdTCP, "nsqdTCP", "127.0.0.1:4150", "set nsqd address")
+	flag.StringVar(&nsqdHttp, "nsqdHTTP", "127.0.0.1:4151", "set nsqd address")
 	flag.IntVar(&localPort, "localPort", 0, "run locally")
 }
 
@@ -63,7 +65,7 @@ func main() {
 	b, _ := braid.New(
 		NodeName,
 		mailboxnsq.WithLookupAddr([]string{nsqLookupAddr}),
-		mailboxnsq.WithNsqdAddr([]string{nsqdAddr}))
+		mailboxnsq.WithNsqdAddr([]string{nsqdTCP}, []string{nsqdHttp}))
 
 	b.RegistModule(
 		braid.Discover(
