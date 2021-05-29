@@ -13,7 +13,7 @@ import (
 
 	"github.com/pojol/braid-go"
 	"github.com/pojol/braid-go/modules/grpcserver"
-	"github.com/pojol/braid-go/modules/mailboxnsq"
+	"github.com/pojol/braid-go/modules/pubsubnsq"
 	"google.golang.org/grpc"
 )
 
@@ -54,23 +54,23 @@ func main() {
 
 	constant.MailRandRecord = rand.Intn(10000)
 
-	b, _ := braid.New(
-		NodeName,
-		mailboxnsq.WithLookupAddr([]string{nsqLookupAddr}),
-		mailboxnsq.WithNsqdAddr([]string{nsqdTCP}, []string{nsqdHttp}),
+	b, _ := braid.NewService("mail")
+	b.Register(
+		braid.Module(braid.LoggerZap),
+		braid.Module(braid.PubsubNsq,
+			pubsubnsq.WithLookupAddr([]string{nsqLookupAddr}),
+			pubsubnsq.WithNsqdAddr([]string{nsqdTCP}, []string{nsqdHttp}),
+		),
+		braid.Module(braid.ServerGRPC, grpcserver.WithListen(":14301")),
 	)
 
-	b.RegistModule(
-		braid.Server(grpcserver.Name, grpcserver.WithListen(":14301")),
-	)
-
-	api.RegisterMailServer(braid.GetServer().(*grpc.Server), &handle.MailServer{})
+	api.RegisterMailServer(braid.Server().Server().(*grpc.Server), &handle.MailServer{})
 
 	b.Init()
 	b.Run()
 	defer b.Close()
 
-	ch := make(chan os.Signal)
+	ch := make(chan os.Signal, 1)
 	signal.Notify(ch, syscall.SIGTERM, syscall.SIGINT)
 	<-ch
 

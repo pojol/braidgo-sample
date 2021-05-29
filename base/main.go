@@ -3,7 +3,6 @@ package main
 import (
 	"braid-game/base/handle"
 	"braid-game/common"
-	"braid-game/proto"
 	"braid-game/proto/api"
 	"flag"
 	"math/rand"
@@ -18,7 +17,7 @@ import (
 	"github.com/pojol/braid-go/modules/grpcserver"
 	"github.com/pojol/braid-go/modules/jaegertracing"
 	"github.com/pojol/braid-go/modules/linkerredis"
-	"github.com/pojol/braid-go/modules/mailboxnsq"
+	"github.com/pojol/braid-go/modules/pubsubnsq"
 	"google.golang.org/grpc"
 )
 
@@ -56,26 +55,22 @@ func main() {
 		return
 	}
 
-	b, err := braid.New(
-		proto.ServiceBase,
-		mailboxnsq.WithLookupAddr([]string{nsqLookupAddr}),
-		mailboxnsq.WithNsqdAddr([]string{nsqdTCP}, []string{nsqdHttp}))
-	if err != nil {
-		panic(err)
-	}
-
-	b.RegistModule(
-		braid.Discover(
-			discoverconsul.Name,
-			discoverconsul.WithConsulAddr(consulAddr)),
-		braid.LinkCache(linkerredis.Name,
+	b, _ := braid.NewService("base")
+	b.Register(
+		braid.Module(braid.LoggerZap),
+		braid.Module(braid.PubsubNsq,
+			pubsubnsq.WithLookupAddr([]string{nsqLookupAddr}),
+			pubsubnsq.WithNsqdAddr([]string{nsqdTCP}, []string{nsqdHttp}),
+		),
+		braid.Module(braid.DiscoverConsul,
+			discoverconsul.WithConsulAddr(consulAddr),
+			discoverconsul.WithBlacklist([]string{"gateway"}),
+		),
+		braid.Module(braid.LinkcacheRedis,
 			linkerredis.WithRedisAddr(redisAddr),
 			linkerredis.WithMode(linkerredis.LinkerRedisModeLocal),
 		),
-		braid.Client(grpcclient.Name),
-		braid.Server(grpcserver.Name, grpcserver.WithListen(":14201")),
-		braid.Tracing(
-			jaegertracing.Name,
+		braid.Module(braid.TracerJaeger,
 			jaegertracing.WithHTTP(jaegerAddr),
 			jaegertracing.WithProbabilistic(1),
 			jaegertracing.WithSpanFactory(
@@ -93,15 +88,18 @@ func main() {
 				},
 			),
 		),
+		braid.Module(braid.BalancerSWRR),
+		braid.Module(grpcclient.Name),
+		braid.Module(braid.ServerGRPC, grpcserver.WithListen(":14201")),
 	)
 
-	api.RegisterBaseServer(braid.GetServer().(*grpc.Server), &handle.BaseServer{})
+	api.RegisterBaseServer(braid.Server().Server().(*grpc.Server), &handle.BaseServer{})
 
 	b.Init()
 	b.Run()
 	defer b.Close()
 
-	ch := make(chan os.Signal)
+	ch := make(chan os.Signal, 1)
 	signal.Notify(ch, syscall.SIGTERM, syscall.SIGINT)
 	<-ch
 }

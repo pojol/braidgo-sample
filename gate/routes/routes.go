@@ -19,7 +19,7 @@ func loginGuest(ctx echo.Context) error {
 	res := &api.GuestRegistRes{}
 	byt := []byte{}
 
-	err := braid.GetClient().Invoke(ctx.Request().Context(),
+	err := braid.Client().Invoke(ctx.Request().Context(),
 		proto.ServiceLogin,
 		proto.APILoginGuest,
 		"",
@@ -77,7 +77,7 @@ func baseAccRename(ctx echo.Context) error {
 	req.Nickname = jreq.Nickname
 	req.Token = token
 
-	err = braid.GetClient().Invoke(ctx.Request().Context(),
+	err = braid.Client().Invoke(ctx.Request().Context(),
 		proto.ServiceBase,
 		proto.APIBaseAccRename,
 		token,

@@ -3,7 +3,6 @@ package main
 import (
 	"braid-game/login/constant"
 	"braid-game/login/handle"
-	"braid-game/proto"
 	"braid-game/proto/api"
 	"flag"
 	"math/rand"
@@ -17,7 +16,7 @@ import (
 	"github.com/pojol/braid-go/modules/grpcclient"
 	"github.com/pojol/braid-go/modules/grpcserver"
 	"github.com/pojol/braid-go/modules/linkerredis"
-	"github.com/pojol/braid-go/modules/mailboxnsq"
+	"github.com/pojol/braid-go/modules/pubsubnsq"
 	"google.golang.org/grpc"
 )
 
@@ -58,31 +57,33 @@ func main() {
 
 	constant.LoginRandRecord = rand.Intn(10000)
 
-	b, _ := braid.New(
-		proto.ServiceLogin,
-		mailboxnsq.WithLookupAddr([]string{nsqLookupAddr}),
-		mailboxnsq.WithNsqdAddr([]string{nsqdTCP}, []string{nsqdHttp}))
-
-	b.RegistModule(
-		braid.Server(grpcserver.Name, grpcserver.WithListen(":14101")),
-		braid.Discover(
-			discoverconsul.Name,
+	b, _ := braid.NewService("login")
+	b.Register(
+		braid.Module(braid.LoggerZap),
+		braid.Module(braid.PubsubNsq,
+			pubsubnsq.WithLookupAddr([]string{nsqLookupAddr}),
+			pubsubnsq.WithNsqdAddr([]string{nsqdTCP}, []string{nsqdHttp}),
+		),
+		braid.Module(braid.DiscoverConsul,
 			discoverconsul.WithConsulAddr(consulAddr),
-			discoverconsul.WithBlacklist([]string{"gateway"})),
-		braid.LinkCache(linkerredis.Name,
+			discoverconsul.WithBlacklist([]string{"gateway"}),
+		),
+		braid.Module(braid.LinkcacheRedis,
 			linkerredis.WithRedisAddr(redisAddr),
 			linkerredis.WithMode(linkerredis.LinkerRedisModeLocal),
 		),
-		braid.Client(grpcclient.Name),
+		braid.Module(braid.BalancerSWRR),
+		braid.Module(grpcclient.Name),
+		braid.Module(braid.ServerGRPC, grpcserver.WithListen(":14101")),
 	)
 
-	api.RegisterLoginServer(braid.GetServer().(*grpc.Server), &handle.LoginServer{})
+	api.RegisterLoginServer(braid.Server().Server().(*grpc.Server), &handle.LoginServer{})
 
 	b.Init()
 	b.Run()
 	defer b.Close()
 
-	ch := make(chan os.Signal)
+	ch := make(chan os.Signal, 1)
 	signal.Notify(ch, syscall.SIGTERM, syscall.SIGINT)
 	<-ch
 }

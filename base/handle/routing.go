@@ -41,7 +41,7 @@ func (bs *BaseServer) AccRename(ctx context.Context, req *api.AccRenameReq) (res
 		}
 	}
 
-	braid.GetClient().Invoke(ctx,
+	braid.Client().Invoke(ctx,
 		proto.ServiceMail,
 		proto.APIMailSend,
 		req.Token,

@@ -16,10 +16,9 @@ import (
 	"github.com/pojol/braid-go"
 	"github.com/pojol/braid-go/modules/discoverconsul"
 	"github.com/pojol/braid-go/modules/electorconsul"
-	"github.com/pojol/braid-go/modules/grpcclient"
 	"github.com/pojol/braid-go/modules/jaegertracing"
 	"github.com/pojol/braid-go/modules/linkerredis"
-	"github.com/pojol/braid-go/modules/mailboxnsq"
+	"github.com/pojol/braid-go/modules/pubsubnsq"
 )
 
 var (
@@ -62,28 +61,28 @@ func main() {
 		return
 	}
 
-	b, _ := braid.New(
-		NodeName,
-		mailboxnsq.WithLookupAddr([]string{nsqLookupAddr}),
-		mailboxnsq.WithNsqdAddr([]string{nsqdTCP}, []string{nsqdHttp}))
-
-	b.RegistModule(
-		braid.Discover(
-			discoverconsul.Name,
-			discoverconsul.WithConsulAddr(consulAddr)),
-		braid.Client(grpcclient.Name),
-		braid.LinkCache(linkerredis.Name,
+	b, _ := braid.NewService("gate")
+	b.Register(
+		braid.Module(braid.LoggerZap),
+		braid.Module(braid.PubsubNsq,
+			pubsubnsq.WithLookupAddr([]string{nsqLookupAddr}),
+			pubsubnsq.WithNsqdAddr([]string{nsqdTCP}, []string{nsqdHttp}),
+		),
+		braid.Module(braid.DiscoverConsul,
+			discoverconsul.WithConsulAddr(consulAddr),
+			discoverconsul.WithBlacklist([]string{"gateway"}),
+		),
+		braid.Module(braid.LinkcacheRedis,
 			linkerredis.WithRedisAddr(redisAddr),
+			linkerredis.WithMode(linkerredis.LinkerRedisModeLocal),
 		),
-		braid.Elector(
-			electorconsul.Name,
-			electorconsul.WithConsulAddr(consulAddr),
-		),
-		braid.Tracing(
-			jaegertracing.Name,
+		braid.Module(braid.ElectorConsul, electorconsul.WithConsulAddr(consulAddr)),
+		braid.Module(braid.TracerJaeger,
 			jaegertracing.WithHTTP(jaegerAddr),
 			jaegertracing.WithProbabilistic(1),
 		),
+		braid.Module(braid.BalancerSWRR),
+		braid.Module(braid.ClientGRPC),
 	)
 
 	b.Init()
@@ -100,7 +99,7 @@ func main() {
 		log.Fatalf("start echo err %s", err.Error())
 	}
 
-	ch := make(chan os.Signal)
+	ch := make(chan os.Signal, 1)
 	signal.Notify(ch, syscall.SIGTERM)
 	<-ch
 

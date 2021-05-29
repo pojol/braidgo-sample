@@ -54,6 +54,7 @@ func (card *GuestLoginCard) GetDelay() time.Duration { return card.delay }
 func (card *GuestLoginCard) Enter() []byte {
 
 	b := []byte{}
+	fmt.Println("login enter")
 
 	return b
 }

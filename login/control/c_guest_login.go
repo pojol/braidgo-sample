@@ -8,7 +8,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/pojol/braid-go"
 	"github.com/pojol/braid-go/module/linkcache"
-	"github.com/pojol/braid-go/module/mailbox"
+	"github.com/pojol/braid-go/module/pubsub"
 )
 
 // GuestLogin 游客登录
@@ -21,7 +21,7 @@ func GuestLogin(res *api.GuestRegistRes) error {
 	time.AfterFunc(time.Minute, func() {
 		fmt.Println("send unlink msg", res.Token)
 
-		braid.Mailbox().GetTopic(linkcache.TokenUnlink).Pub(&mailbox.Message{
+		braid.Pubsub().GetTopic(linkcache.TokenUnlink).Pub(&pubsub.Message{
 			Body: []byte(res.Token),
 		})
 	})
