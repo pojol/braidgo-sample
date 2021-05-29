@@ -1,5 +1,8 @@
 ## BraidSample
-`braid@v1.1.13`
+
+[![braid-go](https://img.shields.io/badge/braid-v1.2.20-2ca5e0?style=flat&logo=appveyor)](https://github.com/pojol/braid-go/)
+[![httpbot](https://img.shields.io/badge/httpbot-v1.1.12-2ca5e0?style=flat&logo=appveyor)](https://github.com/pojol/httpbot/)
+
 > 使用[braid-go](https://github.com/pojol/braid-go)微服务构建的框架，可适用于网站，应用，游戏等业务的后端。
 
 [![image.png](https://i.postimg.cc/QtrF7jsR/image.png)](https://postimg.cc/JyP7VVsq)

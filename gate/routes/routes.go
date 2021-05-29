@@ -9,7 +9,7 @@ import (
 	"io/ioutil"
 	"net/http"
 
-	"github.com/pojol/braid"
+	"github.com/pojol/braid-go"
 
 	"github.com/labstack/echo/v4"
 )
@@ -19,7 +19,7 @@ func loginGuest(ctx echo.Context) error {
 	res := &api.GuestRegistRes{}
 	byt := []byte{}
 
-	err := braid.GetClient().Invoke(ctx.Request().Context(),
+	err := braid.Client().Invoke(ctx.Request().Context(),
 		proto.ServiceLogin,
 		proto.APILoginGuest,
 		"",
@@ -74,9 +74,10 @@ func baseAccRename(ctx echo.Context) error {
 		goto EXT
 	}
 
-	res.Nickname = jreq.Nickname
+	req.Nickname = jreq.Nickname
+	req.Token = token
 
-	err = braid.GetClient().Invoke(ctx.Request().Context(),
+	err = braid.Client().Invoke(ctx.Request().Context(),
 		proto.ServiceBase,
 		proto.APIBaseAccRename,
 		token,
@@ -86,19 +87,21 @@ func baseAccRename(ctx echo.Context) error {
 		goto EXT
 	}
 
-	byt, err = json.Marshal(request.GuestLoginRes{
-		Token: res.Nickname,
+	byt, err = json.Marshal(request.AccountRenameRes{
+		Nickname: res.Nickname,
 	})
 
 EXT:
+	status := http.StatusOK
 	if err != nil {
 		ctx.Response().Header().Set("Errcode", errcode)
 		ctx.Response().Header().Set("Errmsg", err.Error())
+		status = http.StatusBadRequest
 	} else {
 		ctx.Response().Header().Set("Errcode", "0")
 	}
 
-	ctx.Blob(http.StatusOK, "text/plain; charset=utf-8", byt)
+	ctx.Blob(status, "text/plain; charset=utf-8", byt)
 	return nil
 }
 

@@ -3,7 +3,7 @@ package proto
 // base
 const (
 	ServiceBase      = "base"
-	APIBaseAccRename = "/api.base/AccRename"
+	APIBaseAccRename = "/api.base/acc_rename"
 )
 
 // mail

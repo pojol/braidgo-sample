@@ -9,10 +9,12 @@ service mail {
 message sendMailReq {
     string accountid = 1;
     MailBody body = 2;
+    int32 Record = 3;   // test record
 }
 
 message sendMailRes {
     int32 errcode = 1;
+    int32 Record = 2;
 }
 
 message MailBody {

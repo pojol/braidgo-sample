@@ -3,9 +3,9 @@ package middleware
 import (
 	"github.com/labstack/echo/v4"
 	emid "github.com/labstack/echo/v4/middleware"
-	"github.com/pojol/braid"
-	"github.com/pojol/braid/module/tracer"
-	"github.com/pojol/braid/modules/jaegertracing"
+	"github.com/pojol/braid-go"
+	"github.com/pojol/braid-go/module/tracer"
+	"github.com/pojol/braid-go/modules/jaegertracing"
 )
 
 type (
