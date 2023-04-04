@@ -2,13 +2,6 @@
 
 cd build
 
-rm base_linux
-echo "build base_linux ..."
-CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o base_linux ../base/main.go
-
-# build
-docker build -f ../base/bin/Dockerfile -t braid-sample/base .
-
 rm gateway_linux
 echo "build gateway_linux ..."
 CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o gateway_linux ../gate/main.go

@@ -1,7 +1,6 @@
 package main
 
 import (
-	bm "braid-game/gate/middleware"
 	"braid-game/gate/routes"
 	"context"
 	"flag"
@@ -14,11 +13,10 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/pojol/braid-go"
-	"github.com/pojol/braid-go/modules/discoverconsul"
-	"github.com/pojol/braid-go/modules/electorconsul"
-	"github.com/pojol/braid-go/modules/jaegertracing"
-	"github.com/pojol/braid-go/modules/linkerredis"
-	"github.com/pojol/braid-go/modules/pubsubnsq"
+	"github.com/pojol/braid-go/depend"
+	"github.com/pojol/braid-go/depend/blog"
+	"github.com/pojol/braid-go/depend/bredis"
+	"github.com/redis/go-redis/v9"
 )
 
 var (
@@ -62,27 +60,9 @@ func main() {
 	}
 
 	b, _ := braid.NewService("gate")
-	b.Register(
-		braid.Module(braid.LoggerZap),
-		braid.Module(braid.PubsubNsq,
-			pubsubnsq.WithLookupAddr([]string{nsqLookupAddr}),
-			pubsubnsq.WithNsqdAddr([]string{nsqdTCP}, []string{nsqdHttp}),
-		),
-		braid.Module(braid.DiscoverConsul,
-			discoverconsul.WithConsulAddr(consulAddr),
-			discoverconsul.WithBlacklist([]string{"gateway"}),
-		),
-		braid.Module(braid.LinkcacheRedis,
-			linkerredis.WithRedisAddr(redisAddr),
-			linkerredis.WithMode(linkerredis.LinkerRedisModeLocal),
-		),
-		braid.Module(braid.ElectorConsul, electorconsul.WithConsulAddr(consulAddr)),
-		braid.Module(braid.TracerJaeger,
-			jaegertracing.WithHTTP(jaegerAddr),
-			jaegertracing.WithProbabilistic(1),
-		),
-		braid.Module(braid.BalancerSWRR),
-		braid.Module(braid.ClientGRPC),
+	b.RegisterDepend(
+		depend.Logger(blog.BuildWithOption()),
+		depend.Redis(bredis.BuildWithOption(&redis.Options{Addr: redisAddr})),
 	)
 
 	b.Init()
@@ -90,7 +70,6 @@ func main() {
 	defer b.Close()
 
 	e := echo.New()
-	e.Use(bm.ReqTrace())
 	//e.Use(bm.ReqLimit())
 	routes.Regist(e)
 

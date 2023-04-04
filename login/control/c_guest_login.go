@@ -21,7 +21,7 @@ func GuestLogin(res *api.GuestRegistRes) error {
 	time.AfterFunc(time.Minute, func() {
 		fmt.Println("send unlink msg", res.Token)
 
-		braid.Pubsub().GetTopic(linkcache.TokenUnlink).Pub(&pubsub.Message{
+		braid.Pubsub().ClusterTopic(linkcache.TopicUnlink).Pub(&pubsub.Message{
 			Body: []byte(res.Token),
 		})
 	})

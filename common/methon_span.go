@@ -2,10 +2,8 @@ package common
 
 import (
 	"context"
-	"errors"
 
 	"github.com/opentracing/opentracing-go"
-	"github.com/pojol/braid-go/module/tracer"
 	"github.com/uber/jaeger-client-go"
 )
 
@@ -15,22 +13,6 @@ type MethonTracer struct {
 	tracing opentracing.Tracer
 
 	starting bool
-}
-
-func CreateMethonSpanFactory() tracer.SpanFactory {
-	return func(tracing interface{}) (tracer.ISpan, error) {
-
-		t, ok := tracing.(opentracing.Tracer)
-		if !ok {
-			return nil, errors.New("")
-		}
-
-		rt := &MethonTracer{
-			tracing: t,
-		}
-
-		return rt, nil
-	}
 }
 
 // Begin 开始监听

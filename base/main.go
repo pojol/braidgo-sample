@@ -2,95 +2,57 @@ package main
 
 import (
 	"braid-game/base/handle"
-	"braid-game/common"
 	"braid-game/proto/api"
-	"flag"
 	"math/rand"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
 
+	grpc_prometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
 	"github.com/pojol/braid-go"
-	"github.com/pojol/braid-go/modules/discoverconsul"
-	"github.com/pojol/braid-go/modules/grpcclient"
-	"github.com/pojol/braid-go/modules/grpcserver"
-	"github.com/pojol/braid-go/modules/jaegertracing"
-	"github.com/pojol/braid-go/modules/linkerredis"
-	"github.com/pojol/braid-go/modules/pubsubnsq"
+	"github.com/pojol/braid-go/depend"
+	"github.com/pojol/braid-go/depend/bconsul"
+	"github.com/pojol/braid-go/depend/blog"
+	"github.com/pojol/braid-go/depend/bredis"
+	"github.com/pojol/braid-go/mock"
+	"github.com/pojol/braid-go/module/elector"
+	"github.com/pojol/braid-go/module/modules"
+	"github.com/pojol/braid-go/module/pubsub"
+	"github.com/pojol/braid-go/module/rpc/client"
+	"github.com/pojol/braid-go/module/rpc/server"
+	"github.com/redis/go-redis/v9"
 	"google.golang.org/grpc"
 )
 
-var (
-	help bool
-
-	consulAddr    string
-	jaegerAddr    string
-	nsqLookupAddr string
-	nsqdTCP       string
-	nsqdHttp      string
-	redisAddr     string
-	localPort     int
-)
-
-func initFlag() {
-	flag.BoolVar(&help, "h", false, "this help")
-
-	flag.StringVar(&consulAddr, "consul", "http://127.0.0.1:8500", "set consul address")
-	flag.StringVar(&jaegerAddr, "jaeger", "http://127.0.0.1:9411/api/v2/spans", "set jaeger address")
-	flag.StringVar(&nsqLookupAddr, "nsqlookupd", "127.0.0.1:4161", "set nsq lookup address")
-	flag.StringVar(&nsqdTCP, "nsqdTCP", "127.0.0.1:4150", "set nsqd address")
-	flag.StringVar(&nsqdHttp, "nsqdHTTP", "127.0.0.1:4151", "set nsqd address")
-	flag.StringVar(&redisAddr, "redis", "redis://127.0.0.1:6379/0", "set redis address")
-	flag.IntVar(&localPort, "localPort", 0, "run locally")
-}
-
 func main() {
-	initFlag()
 	rand.Seed(time.Now().UnixNano())
-
-	flag.Parse()
-	if help {
-		flag.Usage()
-		return
-	}
+	mock.Init()
 
 	b, _ := braid.NewService("base")
-	b.Register(
-		braid.Module(braid.LoggerZap),
-		braid.Module(braid.PubsubNsq,
-			pubsubnsq.WithLookupAddr([]string{nsqLookupAddr}),
-			pubsubnsq.WithNsqdAddr([]string{nsqdTCP}, []string{nsqdHttp}),
+	b.RegisterDepend(
+		depend.Logger(blog.BuildWithOption()),
+		depend.Redis(bredis.BuildWithOption(&redis.Options{Addr: mock.RedisAddr})),
+		depend.Consul(
+			bconsul.BuildWithOption(bconsul.WithAddress([]string{mock.ConsulAddr})),
 		),
-		braid.Module(braid.DiscoverConsul,
-			discoverconsul.WithConsulAddr(consulAddr),
-			discoverconsul.WithBlacklist([]string{"gateway"}),
+	)
+
+	b.RegisterModule(
+		modules.Pubsub(
+			pubsub.WithLookupAddr([]string{mock.NSQLookupdAddr}),
+			pubsub.WithNsqdAddr([]string{mock.NsqdAddr}, []string{mock.NsqdHttpAddr}),
 		),
-		braid.Module(braid.LinkcacheRedis,
-			linkerredis.WithRedisAddr(redisAddr),
-			linkerredis.WithMode(linkerredis.LinkerRedisModeLocal),
+		modules.Client(
+			client.AppendInterceptors(grpc_prometheus.UnaryClientInterceptor),
 		),
-		braid.Module(braid.TracerJaeger,
-			jaegertracing.WithHTTP(jaegerAddr),
-			jaegertracing.WithProbabilistic(1),
-			jaegertracing.WithSpanFactory(
-				jaegertracing.SpanFactory{
-					Name:    "tracer_span_echo",
-					Factory: jaegertracing.CreateEchoTraceSpan(),
-				},
-				jaegertracing.SpanFactory{
-					Name:    "tracer_span_redis",
-					Factory: jaegertracing.CreateRedisSpanFactory(),
-				},
-				jaegertracing.SpanFactory{
-					Name:    "tracer_span_methon",
-					Factory: common.CreateMethonSpanFactory(),
-				},
-			),
+		modules.Server(
+			server.WithListen(":14201"),
+			server.AppendInterceptors(grpc_prometheus.UnaryServerInterceptor),
 		),
-		braid.Module(braid.BalancerSWRR),
-		braid.Module(grpcclient.Name),
-		braid.Module(braid.ServerGRPC, grpcserver.WithListen(":14201")),
+		modules.Discover(),
+		modules.Elector(
+			elector.WithLockTick(3*time.Second)),
 	)
 
 	api.RegisterBaseServer(braid.Server().Server().(*grpc.Server), &handle.BaseServer{})

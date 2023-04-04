@@ -12,11 +12,6 @@ import (
 	"time"
 
 	"github.com/pojol/braid-go"
-	"github.com/pojol/braid-go/modules/discoverconsul"
-	"github.com/pojol/braid-go/modules/grpcclient"
-	"github.com/pojol/braid-go/modules/grpcserver"
-	"github.com/pojol/braid-go/modules/linkerredis"
-	"github.com/pojol/braid-go/modules/pubsubnsq"
 	"google.golang.org/grpc"
 )
 
@@ -58,24 +53,7 @@ func main() {
 	constant.LoginRandRecord = rand.Intn(10000)
 
 	b, _ := braid.NewService("login")
-	b.Register(
-		braid.Module(braid.LoggerZap),
-		braid.Module(braid.PubsubNsq,
-			pubsubnsq.WithLookupAddr([]string{nsqLookupAddr}),
-			pubsubnsq.WithNsqdAddr([]string{nsqdTCP}, []string{nsqdHttp}),
-		),
-		braid.Module(braid.DiscoverConsul,
-			discoverconsul.WithConsulAddr(consulAddr),
-			discoverconsul.WithBlacklist([]string{"gateway"}),
-		),
-		braid.Module(braid.LinkcacheRedis,
-			linkerredis.WithRedisAddr(redisAddr),
-			linkerredis.WithMode(linkerredis.LinkerRedisModeLocal),
-		),
-		braid.Module(braid.BalancerSWRR),
-		braid.Module(grpcclient.Name),
-		braid.Module(braid.ServerGRPC, grpcserver.WithListen(":14101")),
-	)
+	
 
 	api.RegisterLoginServer(braid.Server().Server().(*grpc.Server), &handle.LoginServer{})
 

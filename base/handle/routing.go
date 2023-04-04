@@ -6,10 +6,8 @@ import (
 	"braid-game/proto/api"
 	"context"
 	"errors"
-	"fmt"
 
 	"github.com/pojol/braid-go"
-	"github.com/pojol/braid-go/module/tracer"
 )
 
 // BaseServer 基础业务服务节点
@@ -25,22 +23,6 @@ func (bs *BaseServer) AccRename(ctx context.Context, req *api.AccRenameReq) (res
 
 	mailRes := &api.SendMailRes{}
 
-	tracing := braid.Tracer()
-	var span tracer.ISpan
-
-	if tracing != nil {
-		span, err = tracing.GetSpan("tracer_span_methon")
-		if err != nil {
-			fmt.Println("get span err", err.Error())
-		}
-		if span != nil {
-			span.Begin(ctx)
-			span.SetTag("methon", "AccRename")
-			span.SetTag("nickname", req.Nickname)
-			defer span.End(ctx)
-		}
-	}
-
 	braid.Client().Invoke(ctx,
 		proto.ServiceMail,
 		proto.APIMailSend,
@@ -54,7 +36,6 @@ func (bs *BaseServer) AccRename(ctx context.Context, req *api.AccRenameReq) (res
 		mailRes,
 	)
 
-	span.SetTag("errcode", mailRes.Errcode)
 	if mailRes.Errcode != int32(errcode.Succ) {
 		return res, errors.New("send mail fail")
 	}
