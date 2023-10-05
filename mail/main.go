@@ -4,58 +4,62 @@ import (
 	"braid-game/mail/constant"
 	"braid-game/mail/handle"
 	"braid-game/proto/api"
-	"flag"
+	"fmt"
 	"math/rand"
 	"os"
 	"os/signal"
 	"syscall"
-	"time"
 
+	grpc_prometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
 	"github.com/pojol/braid-go"
+	"github.com/pojol/braid-go/components"
+	"github.com/pojol/braid-go/components/depends/bk8s"
+	"github.com/pojol/braid-go/components/discoverk8s"
+	"github.com/pojol/braid-go/components/rpcgrpc/grpcserver"
+	"github.com/redis/go-redis/v9"
 	"google.golang.org/grpc"
 )
 
 var (
-	help bool
-
-	consulAddr    string
-	jaegerAddr    string
-	localPort     int
-	nsqLookupAddr string
-	nsqdTCP       string
-	nsqdHttp      string
-
-	// NodeName 节点名
-	NodeName = "mail"
+	ServiceName = "mail"
 )
 
-func initFlag() {
-	flag.BoolVar(&help, "h", false, "this help")
-
-	flag.StringVar(&consulAddr, "consul", "http://127.0.0.1:8500", "set consul address")
-	flag.StringVar(&jaegerAddr, "jaeger", "http://127.0.0.1:9411/api/v2/spans", "set jaeger address")
-	flag.StringVar(&nsqLookupAddr, "nsqlookupd", "127.0.0.1:4161", "set nsq lookup address")
-	flag.StringVar(&nsqdTCP, "nsqdTCP", "127.0.0.1:4150", "set nsqd address")
-	flag.StringVar(&nsqdHttp, "nsqdHTTP", "127.0.0.1:4151", "set nsqd address")
-	flag.IntVar(&localPort, "localPort", 0, "run locally")
-}
-
 func main() {
-	initFlag()
-	rand.Seed(time.Now().UnixNano())
-
-	flag.Parse()
-	if help {
-		flag.Usage()
-		return
-	}
 
 	constant.MailRandRecord = rand.Intn(10000)
 
-	b, _ := braid.NewService("mail")
-	api.RegisterMailServer(braid.Server().Server().(*grpc.Server), &handle.MailServer{})
+	redis_addr := os.Getenv("REDIS_ADDR")
 
+	fmt.Println("new service")
+	b, _ := braid.NewService(
+		"mail",
+		os.Getenv("POD_NAME"),
+		&components.DefaultDirector{
+			Opts: &components.DirectorOpts{
+				ServerOpts: []grpcserver.Option{
+					grpcserver.WithListen(":14301"),
+					grpcserver.AppendUnaryInterceptors(grpc_prometheus.UnaryServerInterceptor),
+					grpcserver.RegisterHandler(func(srv *grpc.Server) {
+						api.RegisterMailServer(srv, &handle.MailServer{})
+					}),
+				},
+				K8sCliOpts: []bk8s.Option{
+					bk8s.WithConfigPath(""),
+				},
+				RedisCliOpts: &redis.Options{
+					Addr: redis_addr,
+				},
+				DiscoverOpts: []discoverk8s.Option{
+					discoverk8s.WithNamespace("braidgo"),
+					discoverk8s.WithSelectorTag("braidgo"),
+				},
+			},
+		},
+	)
+
+	fmt.Println("init service")
 	b.Init()
+	fmt.Println("run service")
 	b.Run()
 	defer b.Close()
 

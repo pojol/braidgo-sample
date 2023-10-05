@@ -14,6 +14,6 @@ const (
 
 // login
 const (
-	ServiceLogin  = "login"
+	ServiceLogin  = "sample-login"
 	APILoginGuest = "/api.login/guest_regist"
 )

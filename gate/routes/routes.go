@@ -6,6 +6,7 @@ import (
 	"braid-game/proto/request"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 
@@ -19,7 +20,8 @@ func loginGuest(ctx echo.Context) error {
 	res := &api.GuestRegistRes{}
 	byt := []byte{}
 
-	err := braid.Client().Invoke(ctx.Request().Context(),
+	fmt.Println("login guest!")
+	err := braid.Send(ctx.Request().Context(),
 		proto.ServiceLogin,
 		proto.APILoginGuest,
 		"",
@@ -77,7 +79,7 @@ func baseAccRename(ctx echo.Context) error {
 	req.Nickname = jreq.Nickname
 	req.Token = token
 
-	err = braid.Client().Invoke(ctx.Request().Context(),
+	err = braid.Send(ctx.Request().Context(),
 		proto.ServiceBase,
 		proto.APIBaseAccRename,
 		token,
